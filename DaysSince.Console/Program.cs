@@ -28,12 +28,12 @@ class Program
         if (invalidPairs.Any())
         {
             WriteLine($"Warning: {invalidPairs.Count} invalid lines will be ignored");
-            invalidPairs.ForEach(i => WriteLine($"- {string.Join(";", i)}"));
+            invalidPairs.ForEach(ip => WriteLine($"- {string.Join(";", ip)}"));
         }
 
         var targetDates = pairs
             .Except(invalidPairs)
-            .Select(p => new TargetDate(p[0], DateOnly.Parse(p[1])))
+            .Select(p => new TargetDate(p.First(), DateOnly.Parse(p.Last())))
             .OrderByDescending(p => p.DaysSince)
             .ToImmutableList();
 
