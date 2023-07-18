@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using Spectre.Console;
 
 namespace DaysSince.Console;
@@ -44,7 +43,6 @@ class Program
         table.AddColumn(new TableColumn("Date").RightAligned());
         table.AddColumn(new TableColumn("Day No.").RightAligned());
         table.AddColumn("Next Milestone");
-        //table.AddColumn(new TableColumn("Bar").Centered());
         targetDates.ForEach(d =>
         {
             var milestone = new NextMilestone(1000, d);
