@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using Spectre.Console;
 
 namespace DaysSince.Console;
 
@@ -37,11 +39,21 @@ class Program
             .OrderByDescending(p => p.DaysSince)
             .ToImmutableList();
 
+        var table = new Table();
+        table.AddColumn("Label");
+        table.AddColumn(new TableColumn("Date").RightAligned());
+        table.AddColumn(new TableColumn("Day No.").RightAligned());
+        table.AddColumn("Next Milestone");
+        //table.AddColumn(new TableColumn("Bar").Centered());
         targetDates.ForEach(d =>
         {
-            Write($"• {d.Label}: Day #{d.DaysSince:#,##0}, counting from since {d.Date}");
             var milestone = new NextMilestone(1000, d);
-            WriteLine($" ({milestone.DaysUntil:#,##0} on {milestone.Date})");
+            table.AddRow(
+                d.Label,
+                d.Date.ToString(),
+                $"{d.DaysSince:#,##0}",
+                $"{milestone.DaysUntil:#,##0} on {milestone.Date}");
         });
+        AnsiConsole.Write(table);
     }
 }
