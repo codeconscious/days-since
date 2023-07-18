@@ -4,7 +4,9 @@ namespace DaysSince.Console;
 
 class Program
 {
-    static void Main(string[] args)
+    private static readonly string _csvFileName = "Dates.csv";
+
+    static void Main()
     {
         DateOnly now = DateOnly.FromDateTime(DateTime.Now.Date);
         WriteLine($"Today is {now}");
@@ -12,7 +14,7 @@ class Program
         ImmutableList<string> lines;
         try
         {
-            lines = File.ReadAllLines("Dates.csv").ToImmutableList();
+            lines = File.ReadAllLines(_csvFileName).ToImmutableList();
         }
         catch (Exception ex)
         {
