@@ -6,6 +6,7 @@ namespace DaysSince.Console;
 class Program
 {
     private static readonly string _csvFileName = "Dates.csv";
+    private static readonly int _milestoneInterval = 1000;
 
     static void Main()
     {
@@ -45,7 +46,7 @@ class Program
         table.AddColumn("Next Milestone");
         targetDates.ForEach(d =>
         {
-            var milestone = new NextMilestone(1000, d);
+            NextMilestone milestone = new(_milestoneInterval, d);
             table.AddRow(
                 d.Label,
                 d.Date.ToString(),
