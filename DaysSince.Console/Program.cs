@@ -1,15 +1,17 @@
 ﻿using System.IO;
+using Spectre.Console;
 
 namespace DaysSince.Console;
 
 class Program
 {
     private static readonly string _csvFileName = "Dates.csv";
+    private static readonly int _milestoneInterval = 1000;
 
     static void Main()
     {
         DateOnly now = DateOnly.FromDateTime(DateTime.Now.Date);
-        WriteLine($"Today is {now}");
+        AnsiConsole.WriteLine($"Today is {now}");
 
         ImmutableList<string> lines;
         try
@@ -18,7 +20,7 @@ class Program
         }
         catch (Exception ex)
         {
-            WriteLine($"Failure reading the date CSV file: {ex.Message}");
+            AnsiConsole.MarkupLine($"[red]Failure reading the date CSV file: {ex.Message}[/]");
             return;
         }
 
@@ -27,8 +29,8 @@ class Program
         var invalidPairs = pairs.Where(p => p.Length != 2).ToImmutableList();
         if (invalidPairs.Any())
         {
-            WriteLine($"Warning: {invalidPairs.Count} invalid lines will be ignored");
-            invalidPairs.ForEach(ip => WriteLine($"- {string.Join(";", ip)}"));
+            AnsiConsole.MarkupLine($"[yellow]Warning: {invalidPairs.Count} invalid line(s) will be ignored.[/]");
+            invalidPairs.ForEach(ip => AnsiConsole.WriteLine($"- {string.Join(";", ip)}"));
         }
 
         var targetDates = pairs
@@ -37,11 +39,20 @@ class Program
             .OrderByDescending(p => p.DaysSince)
             .ToImmutableList();
 
-        targetDates.ForEach(d =>
+        var table = new Table();
+        table.AddColumn("Label");
+        table.AddColumn(new TableColumn("Date").RightAligned());
+        table.AddColumn(new TableColumn("Day No.").RightAligned());
+        table.AddColumn("Next Milestone");
+        targetDates.ForEach(date =>
         {
-            Write($"• {d.Label}: Day #{d.DaysSince:#,##0}, counting from since {d.Date}");
-            var milestone = new NextMilestone(1000, d);
-            WriteLine($" ({milestone.DaysUntil:#,##0} on {milestone.Date})");
+            NextMilestone milestone = new(_milestoneInterval, date);
+            table.AddRow(
+                date.Label,
+                date.Date.ToString(),
+                $"{date.DaysSince:#,##0}",
+                $"{milestone.DaysUntil:#,##0} on {milestone.Date}");
         });
+        AnsiConsole.Write(table);
     }
 }
