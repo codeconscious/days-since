@@ -11,7 +11,7 @@ class Program
     static void Main()
     {
         DateOnly now = DateOnly.FromDateTime(DateTime.Now.Date);
-        WriteLine($"Today is {now}");
+        AnsiConsole.WriteLine($"Today is {now}");
 
         ImmutableList<string> lines;
         try
@@ -20,7 +20,7 @@ class Program
         }
         catch (Exception ex)
         {
-            WriteLine($"Failure reading the date CSV file: {ex.Message}");
+            AnsiConsole.MarkupLine($"[red]Failure reading the date CSV file: {ex.Message}[/]");
             return;
         }
 
@@ -29,8 +29,8 @@ class Program
         var invalidPairs = pairs.Where(p => p.Length != 2).ToImmutableList();
         if (invalidPairs.Any())
         {
-            WriteLine($"Warning: {invalidPairs.Count} invalid lines will be ignored");
-            invalidPairs.ForEach(ip => WriteLine($"- {string.Join(";", ip)}"));
+            AnsiConsole.MarkupLine($"[yellow]Warning: {invalidPairs.Count} invalid line(s) will be ignored.[/]");
+            invalidPairs.ForEach(ip => AnsiConsole.WriteLine($"- {string.Join(";", ip)}"));
         }
 
         var targetDates = pairs
@@ -44,13 +44,13 @@ class Program
         table.AddColumn(new TableColumn("Date").RightAligned());
         table.AddColumn(new TableColumn("Day No.").RightAligned());
         table.AddColumn("Next Milestone");
-        targetDates.ForEach(d =>
+        targetDates.ForEach(date =>
         {
-            NextMilestone milestone = new(_milestoneInterval, d);
+            NextMilestone milestone = new(_milestoneInterval, date);
             table.AddRow(
-                d.Label,
-                d.Date.ToString(),
-                $"{d.DaysSince:#,##0}",
+                date.Label,
+                date.Date.ToString(),
+                $"{date.DaysSince:#,##0}",
                 $"{milestone.DaysUntil:#,##0} on {milestone.Date}");
         });
         AnsiConsole.Write(table);
