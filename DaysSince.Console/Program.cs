@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using Spectre.Console;
 
 namespace DaysSince.Console;
@@ -8,7 +7,7 @@ class Program
 {
     private static readonly string _csvFileName = "Dates.csv";
     private static readonly int _milestoneInterval = 1000;
-    private static readonly Func<string[], bool> isNotValidPair = b => b.Length != 2;
+    private static readonly Func<string[], bool> _isNotValidPair = b => b.Length != 2;
 
     static void Main()
     {
@@ -39,10 +38,7 @@ class Program
         }
 
         var datePairs = lines.Select(l => l.Split(",")).ToImmutableList();
-
-        var invalidPairs = datePairs.Where(isNotValidPair);
-        ListInvalidPairs(invalidPairs);
-
+        var invalidPairs = datePairs.Where(_isNotValidPair).ToImmutableList();
         var targetDates = datePairs
             .Except(invalidPairs)
             .Select(p => new TargetDate(p.First(),
@@ -50,29 +46,29 @@ class Program
             .OrderByDescending(p => p.DaysSince)
             .ToImmutableList();
 
+        PrintInvalidPairs(invalidPairs);
         PrintResults(targetDates);
     }
 
-    static void ListInvalidPairs(IEnumerable<string[]> invalidPairs)
+    static void PrintInvalidPairs(ImmutableList<string[]> invalidPairs)
     {
         if (invalidPairs?.Any() != true)
             return;
 
-        var invalidPairList = invalidPairs.ToImmutableList();
-
-        AnsiConsole.MarkupLine($"[yellow]Warning: {invalidPairList.Count} invalid line(s) will be ignored:[/]");
-        invalidPairList.ForEach(invalidPair =>
+        AnsiConsole.MarkupLine($"[yellow]Warning: {invalidPairs.Count} invalid line(s) will be ignored:[/]");
+        invalidPairs.ForEach(invalidPair =>
             AnsiConsole.WriteLine($"- {string.Join(";", invalidPair)}"));
     }
 
-    static void PrintResults(IEnumerable<TargetDate> targetDates)
+    static void PrintResults(ImmutableList<TargetDate> targetDates)
     {
         var table = new Table();
         table.AddColumn("Label");
         table.AddColumn(new TableColumn("Date").RightAligned());
         table.AddColumn(new TableColumn("Day No.").RightAligned());
         table.AddColumn("Next Milestone");
-        targetDates.ToList().ForEach(date =>
+
+        targetDates.ForEach(date =>
         {
             NextMilestone milestone = new(_milestoneInterval, date);
             table.AddRow(

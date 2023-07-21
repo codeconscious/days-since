@@ -9,6 +9,7 @@ readonly struct NextMilestone
     {
         int daysUntil = originalDate.DaysSince + multipleOf - originalDate.DaysSince % multipleOf;
         DaysUntil = daysUntil;
+
         int diff = daysUntil - originalDate.DaysSince;
         Date = DateOnly.FromDateTime(DateTime.Now.Date.AddDays(diff));
     }
