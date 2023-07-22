@@ -6,7 +6,6 @@ namespace DaysSince.Console;
 class Program
 {
     private static readonly string _csvFileName = "Dates.csv";
-    private static readonly int _milestoneInterval = 1000;
     private static readonly Func<string[], bool> _isNotValidPair = b => b.Length != 2;
 
     static void Main()
@@ -23,9 +22,6 @@ class Program
 
     static void Run()
     {
-        DateOnly now = DateOnly.FromDateTime(DateTime.Now.Date);
-        AnsiConsole.WriteLine($"Today is {now}");
-
         ImmutableList<string> lines;
         try
         {
@@ -33,21 +29,20 @@ class Program
         }
         catch (Exception ex)
         {
-            AnsiConsole.MarkupLine($"[red]Failure reading the date CSV file: {ex.Message}[/]");
+            AnsiConsole.MarkupLine($"[red]Failure reading the CSV file: {ex.Message}[/]");
             return;
         }
 
         var datePairs = lines.Select(l => l.Split(",")).ToImmutableList();
         var invalidPairs = datePairs.Where(_isNotValidPair).ToImmutableList();
-        var targetDates = datePairs
-            .Except(invalidPairs)
-            .Select(p => new TargetDate(p.First(),
-                                        DateOnly.Parse(p.Last())))
-            .OrderByDescending(p => p.DaysSince)
-            .ToImmutableList();
+        var eventDates = datePairs.Except(invalidPairs)
+                                  .Select(p => new Event(p.First(),
+                                                         DateOnly.Parse(p.Last())))
+                                  .OrderByDescending(p => p.DaysSince)
+                                  .ToImmutableList();
 
         PrintInvalidPairs(invalidPairs);
-        PrintResults(targetDates);
+        PrintResults(eventDates);
     }
 
     static void PrintInvalidPairs(ImmutableList<string[]> invalidPairs)
@@ -60,22 +55,23 @@ class Program
             AnsiConsole.WriteLine($"- {string.Join(";", invalidPair)}"));
     }
 
-    static void PrintResults(ImmutableList<TargetDate> targetDates)
+    static void PrintResults(ImmutableList<Event> eventDates)
     {
+        AnsiConsole.WriteLine($"Today is {Event.Today}");
+
         var table = new Table();
         table.AddColumn("Label");
         table.AddColumn(new TableColumn("Date").RightAligned());
         table.AddColumn(new TableColumn("Day No.").RightAligned());
         table.AddColumn("Next Milestone");
 
-        targetDates.ForEach(date =>
+        eventDates.ForEach(date =>
         {
-            NextMilestone milestone = new(_milestoneInterval, date);
             table.AddRow(
                 date.Label,
                 date.Date.ToString(),
                 $"{date.DaysSince:#,##0}",
-                $"{milestone.DaysUntil:#,##0} on {milestone.Date}");
+                $"{date.Milestone.DayCount:#,##0} in {date.Milestone.DaysUntil} days on {date.Milestone.Date}");
         });
         AnsiConsole.Write(table);
     }
