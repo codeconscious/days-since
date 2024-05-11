@@ -5,7 +5,7 @@ namespace DaysSince.Console;
 
 class Program
 {
-    private static readonly string _csvFileName = "Dates.csv";
+    private static readonly string _csvFileName = "dates.csv";
     private static readonly Func<string[], bool> _isNotValidPair = b => b.Length != 2;
 
     static void Main()
