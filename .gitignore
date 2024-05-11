@@ -2,7 +2,7 @@
 .vscode/
 *.profraw
 .DS_Store
-Dates.csv
+*.csv
 
 
 ## Ignore Visual Studio temporary files, build results, and
